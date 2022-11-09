@@ -1,11 +1,14 @@
 fileFormatVersion: 2
-guid: 374287e6b33384445a0592e21f55a682
+guid: 8dba96e11bada7d498c42b1ff8f102bb
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable:
   - first:
       74: -203655887218126122
-    second: Medium Left Side Step
+    second: Walking (1)
+  - first:
+      74: -6764422422543093837
+    second: WalkingLeft
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -36,11 +39,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Medium Left Side Step
+      name: WalkingLeft
       takeName: mixamo.com
       internalID: 0
       firstFrame: 0
-      lastFrame: 50
+      lastFrame: 62
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

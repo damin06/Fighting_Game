@@ -5,10 +5,19 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     private Animator Anim;
+    private AnimatorStateInfo Anista;
     private Rigidbody rb;
+
+    [Header("PlayerStates")]
     [SerializeField] private float MoveSpeed = 5;
+    public float JumpPower = 2;
 
     private Vector3 dir = Vector3.zero;
+
+
+    private bool isFlip = false;
+    private bool isJump = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -19,44 +28,92 @@ public class PlayerMove : MonoBehaviour
     void Update()
     {
         Move();
+        Anista = Anim.GetCurrentAnimatorStateInfo(0);
     }
 
     private void Move()
     {
         float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
+        float y = Input.GetAxisRaw("Vertical") / 2;
+
+        if (x > 0)
+        {
+            transform.eulerAngles = new Vector3(0, 90, 0);
+            isFlip = false;
+        }
+        else if (x < 0)
+        {
+            transform.eulerAngles = new Vector3(0, 270, 0);
+            isFlip = true;
+        }
         dir = new Vector3(x, 0, y);
-        if (dir != Vector3.zero)
+
+        if (Anista.IsTag("Motion") || Anista.IsTag("WalkingRight") || Anista.IsTag("WalkingLeft") || Anista.IsTag("WalkFoward") || Anista.IsTag("WalkBakc"))
         {
             rb.MovePosition(this.gameObject.transform.position + dir * MoveSpeed * Time.deltaTime);
-            if (x != 0)
+            if (dir != Vector3.zero)
             {
-                Anim.SetBool("Forward", true);
-            }
 
-            if (y > 0)
-            {
-                Anim.SetBool("Leftward", true);
+                if (x != 0)
+                {
+                    if (x > 0)
+                    {
+                        Anim.SetBool("Forward", true);
+                    }
+                    else
+                    {
+                        Anim.SetBool("Backward", true);
+                    }
+                }
+                else
+                {
+                    Anim.SetBool("Forward", false);
+                    Anim.SetBool("Backward", false);
+                }
+
+                if (y > 0)
+                {
+                    if (isFlip)
+                    {
+                        Anim.SetBool("Rightward", true);
+                    }
+                    else
+                    {
+                        Anim.SetBool("Leftward", true);
+                    }
+                }
+                else if (y < 0)
+                {
+                    if (isFlip)
+                    {
+                        Anim.SetBool("Leftward", true);
+                    }
+                    else
+                    {
+                        Anim.SetBool("Rightward", true);
+                    }
+                }
+                else
+                {
+                    Anim.SetBool("Rightward", false);
+                    Anim.SetBool("Leftward", false);
+                }
             }
-            else if (y < 0)
-            {
-                Anim.SetBool("Rightward", true);
-            }
-            else
-            {
-                Anim.SetBool("Rightward", false);
-                Anim.SetBool("Leftward", false);
-            }
+            // else
+            // {
+            //     Anim.SetBool("Forward", false);
+            //     Anim.SetBool("Backward", false);
+            //     Anim.SetBool("Rightward", false);
+            //     Anim.SetBool("Leftward", false);
+            // }
         }
-        else
+
+        if (Input.GetAxisRaw("Jump") != 0 && !isJump)
         {
-            Anim.SetBool("Forward", false);
-            Anim.SetBool("Rightward", false);
-            Anim.SetBool("Leftward", false);
+            Anim.SetTrigger("Jump");
+            StartCoroutine(JumpPaus());
+            //Jump();
         }
-
-
-
         // if (Input.GetAxisRaw("Horizontal") > 0)
         // {
         //     Anim.SetBool("Forward", true);
@@ -86,6 +143,17 @@ public class PlayerMove : MonoBehaviour
         //     Anim.SetBool("Backward", false);
         //     Anim.SetBool("Forward", false);
         // }
+    }
 
+    public void JumpUp()
+    {
+        rb.AddForce(Vector3.up * JumpPower, ForceMode.Impulse);
+    }
+
+    private IEnumerator JumpPaus()
+    {
+        isJump = true;
+        yield return new WaitForSeconds(1.0f);
+        isJump = false;
     }
 }
