@@ -48,6 +48,22 @@ public class PlayerMove : MonoBehaviour
         }
         dir = new Vector3(x, 0, y);
 
+        //애니매이션 끄기
+
+        if (y == 0)
+        {
+            Anim.SetBool("Rightward", false);
+            Anim.SetBool("Leftward", false);
+        }
+
+        if (x == 0)
+        {
+            Anim.SetBool("Forward", false);
+            Anim.SetBool("Backward", false);
+        }
+
+
+
         if (Anista.IsTag("Motion") || Anista.IsTag("WalkingRight") || Anista.IsTag("WalkingLeft") || Anista.IsTag("WalkFoward") || Anista.IsTag("WalkBakc"))
         {
             rb.MovePosition(this.gameObject.transform.position + dir * MoveSpeed * Time.deltaTime);
