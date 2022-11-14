@@ -17,6 +17,7 @@ public class PlayerMove : MonoBehaviour
 
     private bool isFlip = false;
     private bool isJump = false;
+    private bool isAttack = false;
 
     void Start()
     {
@@ -36,16 +37,23 @@ public class PlayerMove : MonoBehaviour
         float x = Input.GetAxisRaw("Horizontal");
         float y = Input.GetAxisRaw("Vertical") / 2;
 
-        if (x > 0)
+        if (Anista.IsTag("Motion") || Anista.IsTag("WalkingRight") || Anista.IsTag("WalkingLeft") || Anista.IsTag("WalkFoward") || Anista.IsTag("WalkBakc"))
         {
-            transform.eulerAngles = new Vector3(0, 90, 0);
-            isFlip = false;
+            if (x > 0)
+            {
+                transform.eulerAngles = new Vector3(0, 90, 0);
+                //transform.localRotation = Quaternion.Euler(0, 90, 0);
+
+                isFlip = false;
+            }
+            else if (x < 0)
+            {
+                transform.eulerAngles = new Vector3(0, 270, 0);
+                //transform.localRotation = Quaternion.Euler(0, 270, 0);
+                isFlip = true;
+            }
         }
-        else if (x < 0)
-        {
-            transform.eulerAngles = new Vector3(0, 270, 0);
-            isFlip = true;
-        }
+
         dir = new Vector3(x, 0, y);
 
         //애니매이션 끄기
@@ -66,6 +74,10 @@ public class PlayerMove : MonoBehaviour
 
         if (Anista.IsTag("Motion") || Anista.IsTag("WalkingRight") || Anista.IsTag("WalkingLeft") || Anista.IsTag("WalkFoward") || Anista.IsTag("WalkBakc"))
         {
+
+            Attack();
+
+
             rb.MovePosition(this.gameObject.transform.position + dir * MoveSpeed * Time.deltaTime);
             if (dir != Vector3.zero)
             {
@@ -171,5 +183,46 @@ public class PlayerMove : MonoBehaviour
         isJump = true;
         yield return new WaitForSeconds(1.0f);
         isJump = false;
+    }
+
+    private void Attack()
+    {
+        if (!isAttack)
+        {
+            if (Input.GetKeyDown(KeyCode.U))
+            {
+                Anim.SetTrigger("SImplePunchL");
+                isAttack = true;
+                StartCoroutine("AttackCoolTime");
+            }
+
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                Anim.SetTrigger("HeavyPunchR");
+                isAttack = true;
+                StartCoroutine("AttackCoolTime");
+            }
+
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                Anim.SetTrigger("SimpleKickL");
+                isAttack = true;
+                StartCoroutine("AttackCoolTime");
+            }
+
+            if (Input.GetKeyDown(KeyCode.K))
+            {
+                Anim.SetTrigger("HeavyKickR");
+                isAttack = true;
+                StartCoroutine("AttackCoolTime");
+            }
+        }
+
+    }
+
+    IEnumerator AttackCoolTime()
+    {
+        yield return new WaitForSeconds(0.3f);
+        isAttack = false;
     }
 }
