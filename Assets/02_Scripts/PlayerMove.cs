@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
+    private enum CombatState
+    {
+        NONE,
+        PUNCH1,
+        PUNCH2,
+        PUNCH3,
+        KICK1,
+        KCIK2
+
+    }
     private Animator Anim;
     private AnimatorStateInfo Anista;
     private Rigidbody rb;
@@ -12,17 +22,26 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float MoveSpeed = 5;
     public float JumpPower = 2;
 
+
+
+    private float default_Combo_Timer = 0.5f;
+    private float current_Combo_Timer;
+    private CombatState current_Combo_State;
     private Vector3 dir = Vector3.zero;
 
 
     private bool isFlip = false;
     private bool isJump = false;
     private bool isAttack = false;
+    private bool Attack_to_rest = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         Anim = GetComponentInChildren<Animator>();
+        current_Combo_Timer = default_Combo_Timer;
+        current_Combo_State = CombatState.NONE;
+        //current_Combo_State = (CombatState)1;
     }
 
     // Update is called once per frame
@@ -30,6 +49,7 @@ public class PlayerMove : MonoBehaviour
     {
         Move();
         Anista = Anim.GetCurrentAnimatorStateInfo(0);
+        ResetCombo();
     }
 
     private void Move()
@@ -187,42 +207,79 @@ public class PlayerMove : MonoBehaviour
 
     private void Attack()
     {
-        if (!isAttack)
+        // if (!isAttack)
+        //{
+        if (Input.GetKeyDown(KeyCode.U))
         {
-            if (Input.GetKeyDown(KeyCode.U))
+            if (current_Combo_State == CombatState.PUNCH3 || current_Combo_State == CombatState.KICK1 ||
+            current_Combo_State == CombatState.KCIK2)
+                return;
+
+            current_Combo_State++;
+            current_Combo_Timer = default_Combo_Timer;
+            Attack_to_rest = true;
+
+            if (current_Combo_State == CombatState.PUNCH1)
             {
                 Anim.SetTrigger("SImplePunchL");
-                isAttack = true;
-                StartCoroutine("AttackCoolTime");
             }
 
-            if (Input.GetKeyDown(KeyCode.I))
+            if (current_Combo_State == CombatState.PUNCH2)
             {
-                Anim.SetTrigger("HeavyPunchR");
-                isAttack = true;
-                StartCoroutine("AttackCoolTime");
+                Anim.SetTrigger("PunchCombo1");
             }
 
-            if (Input.GetKeyDown(KeyCode.J))
+            if (current_Combo_State == CombatState.PUNCH3)
             {
-                Anim.SetTrigger("SimpleKickL");
-                isAttack = true;
-                StartCoroutine("AttackCoolTime");
+                Anim.SetTrigger("PunchCombo2");
             }
 
-            if (Input.GetKeyDown(KeyCode.K))
-            {
-                Anim.SetTrigger("HeavyKickR");
-                isAttack = true;
-                StartCoroutine("AttackCoolTime");
-            }
+            isAttack = true;
+            StartCoroutine("AttackCoolTime");
         }
+
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+
+            Anim.SetTrigger("HeavyPunchR");
+            isAttack = true;
+            StartCoroutine("AttackCoolTime");
+        }
+
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            Anim.SetTrigger("SimpleKickL");
+            isAttack = true;
+            StartCoroutine("AttackCoolTime");
+        }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            Anim.SetTrigger("HeavyKickR");
+            isAttack = true;
+            StartCoroutine("AttackCoolTime");
+        }
+        // }
 
     }
 
     IEnumerator AttackCoolTime()
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.1f);
         isAttack = false;
+    }
+
+    private void ResetCombo()
+    {
+        if (Attack_to_rest)
+        {
+            current_Combo_Timer -= Time.deltaTime;
+            if (current_Combo_Timer <= 0)
+            {
+                current_Combo_State = CombatState.NONE;
+                Attack_to_rest = false;
+                current_Combo_Timer = default_Combo_Timer;
+            }
+        }
     }
 }
